@@ -11,8 +11,8 @@
 #define OCULUS_MODULE_HPP
 
 // std
-#include <memory>
 #include <ctime>
+#include <memory>
 
 // YARP
 #include <yarp/dev/IFrameTransform.h>
