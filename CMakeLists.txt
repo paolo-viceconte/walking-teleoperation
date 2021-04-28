@@ -14,6 +14,7 @@ find_package(YARP REQUIRED)
 find_package(YCM REQUIRED)
 include(WalkingTeleoperationFindDependencies)
 
+add_subdirectory(libraries)
 add_subdirectory(modules)
 add_subdirectory(app)
 
