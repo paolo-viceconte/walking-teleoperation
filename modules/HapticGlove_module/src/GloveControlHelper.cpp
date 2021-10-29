@@ -89,7 +89,7 @@ bool GloveControlHelper::setFingersForceReference(const yarp::sig::Vector& desir
 //        else
 //            m_desiredForceValues[i] = 0;
     }
-    std::cout<<"Force Feedback \n"<<m_desiredForceValues<<std::endl;
+    //std::cout<<"Force Feedback \n"<<m_desiredForceValues<<std::endl;
 
     m_glove.SendHaptics(SGCore::Haptics::SG_FFBCmd(m_desiredForceValues));
 
@@ -288,7 +288,7 @@ bool GloveControlHelper::setBuzzMotorsReference(const yarp::sig::Vector& desired
 //            m_desiredBuzzValues[i] = 0;
     }
     // vibrate fingers at percetage intensity, between 0-100, integer numbers
-    std::cout<<"Vibrotactile Feedback \n"<<m_desiredBuzzValues<<std::endl;
+    //std::cout<<"Vibrotactile Feedback \n"<<m_desiredBuzzValues<<std::endl;
     m_glove.SendHaptics(SGCore::Haptics::SG_BuzzCmd(m_desiredBuzzValues));
 
     return true;
@@ -432,8 +432,8 @@ void GloveControlHelper::getHumanMotionRange( std::vector<double>& jointRangeMin
         jointRangeMax[i]=m_jointRangeMax[i];
         jointRangeMin[i]=m_jointRangeMin[i];
     }
-    std::cout<<"jointRangeMax"<<jointRangeMax<<std::endl;
-    std::cout<<"jointRangeMin"<<jointRangeMin<<std::endl;
+    //std::cout<<"jointRangeMax"<<jointRangeMax<<std::endl;
+    //std::cout<<"jointRangeMin"<<jointRangeMin<<std::endl;
 }
 
 bool GloveControlHelper::getGloveIMUData(std::vector<double>& gloveImuData)
