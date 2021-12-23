@@ -216,17 +216,9 @@ bool Teleoperation::getFeedbacks()
 
     // get tactile sensors data
     m_robotController->controlHelper()->fingerRawTactileFeedbacks(
-        m_data.m_fingertipRawTactileFeedbacks);
+        m_data.fingertipsRawTactileFeedbacks);
 
-    m_robotSkin->setRawTactileFeedbacks(m_data.m_fingertipRawTactileFeedbacks);
-
-    std::vector<double> fingerTactileFeedbacks;
-    m_robotSkin->getFingertipMaxTactileFeedback(fingerTactileFeedbacks);
-    yInfo() << m_logPrefix << "fingers max tactile feedbacks :" << fingerTactileFeedbacks;
-
-    std::vector<bool> fingersInContact;
-    m_robotSkin->areFingersInContact(fingersInContact);
-    yInfo() << m_logPrefix << "fingers in contact:" << fingersInContact;
+    m_robotSkin->setRawTactileFeedbacks(m_data.fingertipsRawTactileFeedbacks);
 
     double t2 = yarp::os::Time::now();
     //    yInfo() << m_logPrefix << "KF time: " << t2 - t1;
@@ -290,12 +282,18 @@ bool Teleoperation::run()
         yWarning() << m_logPrefix << "unable to get the vibrotactile feedback from retargeting.";
     }
 
+    // tactile feedback
+    std::vector<double> vibrotactileFeedback;
+    m_robotSkin->vibrotactileFeedback(vibrotactileFeedback);
+    yInfo() << m_logPrefix << "vibrotactile feedback:" << vibrotactileFeedback;
+
     // set the values
     if (m_moveRobot)
     {
         m_robotController->move();
         m_humanGlove->setFingertipForceFeedbackReferences(m_data.humanForceFeedbacks);
-        m_humanGlove->setFingertipVibrotactileFeedbackReferences(m_data.humanVibrotactileFeedbacks);
+        //        m_humanGlove->setFingertipVibrotactileFeedbackReferences(m_data.humanVibrotactileFeedbacks);
+        m_humanGlove->setFingertipVibrotactileFeedbackReferences(vibrotactileFeedback);
     }
 
     if (m_enableLogger)
@@ -328,6 +326,7 @@ bool Teleoperation::prepare(bool& isPrepared)
     if (axisNumber >= m_robotController->controlHelper()->getNumberOfActuatedAxis())
     {
         yInfo() << m_logPrefix << "data collected to learn robot model.";
+        // robot
         if (!m_robotController->isRobotPrepared())
         {
             if (!m_robotController->trainCouplingMatrix())
@@ -337,6 +336,7 @@ bool Teleoperation::prepare(bool& isPrepared)
                 return false;
             }
         }
+        // human
         if (m_getHumanMotionRange)
         {
             std::vector<double> humanHandJointRangeMin, humanHandJointRangeMax;
@@ -345,14 +345,24 @@ bool Teleoperation::prepare(bool& isPrepared)
             m_retargeting->computeJointAngleRetargetingParams(humanHandJointRangeMin,
                                                               humanHandJointRangeMax);
         }
+        // skin
+        m_robotSkin->computeCalibrationParamters();
+
     } else
     {
+
         double time = double(dTime % CouplingConstant) * m_dT * (M_PI / m_calibrationTimePeriod);
+        // robot
         m_robotController->LogDataToCalibrateRobotAxesJointsCoupling(time, axisNumber);
+        // human
+
         if (m_getHumanMotionRange)
         {
             m_humanGlove->findHumanMotionRange();
         }
+
+        // skin
+        m_robotSkin->collectSkinDataForCalibration();
     }
 
     if (m_robotController->isRobotPrepared())
@@ -366,6 +376,7 @@ bool Teleoperation::prepare(bool& isPrepared)
         yWarning() << m_logPrefix << "at this point estimators are not supposed to be initialized.";
         return false;
     }
+
     if (isPrepared)
     {
         if (!m_robotController->initializeEstimators())
@@ -374,6 +385,7 @@ bool Teleoperation::prepare(bool& isPrepared)
             return false;
         }
     }
+
     return true;
 }
 
